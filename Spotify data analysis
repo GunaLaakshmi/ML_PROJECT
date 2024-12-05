@@ -1,0 +1,87 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+import seaborn as sns
+import matplotlib.pyplot as plt
+df = pd.read_csv('/ content/spotify_tracks.csv')
+df.head(5)
+
+df.tail(5)
+
+df.isnull().sum()
+
+df.info()
+
+df.shape
+df.drop('id', axis=1, inplace=True)
+df.describe().T
+
+genre_popularity = df.groupby('genre')['popularity'].mean().sort_values(ascending=False).head(10)
+sns.barplot(x=genre_popularity.values, y=genre_popularity.index, palette='viridis')
+plt.title('Most popular genre by Average', fontsize=15)
+plt.xlabel('Popularity')
+plt.ylabel('Genre')
+plt.show()
+
+df['artists'] = df['artists'].str.split(', ')
+df = df.explode('artists').reset_index(drop=True)
+
+most_artists = df['artists'].value_counts().head(10)
+sns.barplot(x=most_artists.values, y=most_artists.index, palette='mako')
+plt.title('Most artists tracks')
+plt.ylabel('Artists')
+plt.show()
+
+most_popular_artists = df.groupby('artists')['popularity'].mean().sort_values(ascending=False).head(10)
+sns.barplot(x=most_popular_artists.values, y=most_popular_artists.index, palette='mako')
+plt.title('Most Popular Artists')
+plt.ylabel('Artists')
+plt.show()
+
+most_album = df.groupby('artists')['album'].nunique().sort_values(ascending=False).head(10)
+sns.barplot(x=most_album.values, y=most_album.index, palette='viridis')
+plt.title('Artist with most albums')
+plt.ylabel('Artists')
+plt.show()
+
+most_durations = df.groupby('artists')['duration_ms'].mean().sort_values(ascending=False).head(10)
+sns.barplot(x=most_durations.values, y=most_durations.index, palette='viridis')
+plt.title('Artist with longest duration')
+plt.ylabel('Artists')
+plt.show()   
+
+val = df['explicit'].value_counts()
+color = sns.color_palette('flare')
+plt.pie(val, labels=val.index, autopct='%1.f%%', colors=color)
+plt.title('Explicit Songs')
+plt.show()
+
+track_popularity = df.groupby('explicit')['popularity'].mean()
+sns.barplot(x=track_popularity.index, y=track_popularity.values, palette='flare')
+plt.title('Explicit vs Non-Explicit Average Popularity')
+plt.show()
+
+
+explicit_albums = df[df['explicit']==True]
+adult_popularity = explicit_albums.groupby('album')['popularity'].mean().sort_values(ascending=False).head(10)
+sns.barplot(x=adult_popularity.values, y=adult_popularity.index, palette='flare')
+plt.title('Most popular explicit albums', fontsize=15)
+plt.xlabel('Popularity')
+plt.ylabel('Album')
+plt.show()
+
+non_exp = df[df['explicit']==False]
+non_exp_music = non_exp.sort_values('popularity', ascending=False).groupby('name').head(1)
+non_exp_music = non_exp_music.head(10)
+
+exp = df[df['explicit']==True]
+exp_music = exp.sort_values('popularity', ascending=False).groupby('name').head(1)
+exp_music = exp_music.head(10)
+
+sns.barplot(x='popularity', y='name', data=non_exp_music, palette='viridis')
+plt.title('Top 10 Non-Explicit Songs')
+plt.show()
+
+sns.barplot(x='popularity', y='name', data=exp_music, palette='flare')
+plt.title('Top 10 Explicit Songs')
+plt.show
